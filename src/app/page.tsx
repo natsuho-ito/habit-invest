@@ -14,6 +14,7 @@ export default async function Home() {
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">自己投資ポートフォリオ</h1>
         <Link href="/habits/new" className="rounded border px-3 py-2">＋ 新しい習慣</Link>
+        <Link href="/archive" className="rounded border px-3 py-2">殿堂入り</Link>
       </header>
 
       <SevenDayChart />
