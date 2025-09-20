@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { redirect } from "next/navigation";
+import Nav from "@/components/Nav";
 
 export default async function ArchivePage() {
   const supabase = supabaseServer();
@@ -14,6 +15,9 @@ export default async function ArchivePage() {
 
   return (
     <main className="max-w-2xl mx-auto p-6 space-y-4">
+      <header className="flex items-center justify-between">
+        <Nav />
+      </header>
       <h1 className="text-xl font-semibold">殿堂入り（資産コレクション）</h1>
       {(!habits || habits.length === 0) ? (
         <p className="text-sm text-gray-500">まだ殿堂入りした習慣はありません。</p>

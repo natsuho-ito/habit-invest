@@ -1,4 +1,3 @@
-// JSTのYYYY-MM-DDを返す
 export function toYmdJST(d: Date) {
     const parts = new Intl.DateTimeFormat("ja-JP", {
       timeZone: "Asia/Tokyo",
