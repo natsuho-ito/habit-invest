@@ -2,7 +2,8 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { redirect } from "next/navigation";
 import SevenDayChart from "@/components/SevenDayChart";
 import ActiveHabits from "@/components/ActiveHabits";
-import Link from "next/link";
+// import Link from "next/link";
+import Nav from "@/components/Nav";
 
 export default async function Home() {
   const supabase = supabaseServer();
@@ -12,9 +13,10 @@ export default async function Home() {
   return (
     <main className="max-w-2xl mx-auto p-6 space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">自己投資ポートフォリオ</h1>
+        {/* <h1 className="text-xl font-semibold">自己投資ポートフォリオ</h1>
         <Link href="/habits/new" className="rounded border px-3 py-2">＋ 新しい習慣</Link>
-        <Link href="/archive" className="rounded border px-3 py-2">殿堂入り</Link>
+        <Link href="/archive" className="rounded border px-3 py-2">殿堂入り</Link> */}
+        <Nav />
       </header>
 
       <SevenDayChart />

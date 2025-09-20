@@ -6,7 +6,7 @@ export default function AuthButton() {
 
   return (
     <button
-      className="px-3 py-2 rounded border"
+      className="px-2 py-1 text-sm border rounded"
       onClick={async () => {
         await supabase.auth.signOut();
         location.href = "/login";
