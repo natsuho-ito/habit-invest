@@ -59,7 +59,7 @@ export default function AddHabitForm() {
         .eq("status", "active");
 
       if (countErr) throw countErr;
-      if ((actives as any)?.length === 0 && typeof actives?.length !== "number") {
+      if (!actives || actives.length === 0) {
         // head:true のとき data は null になるため count は別取得
       }
       // Supabaseは head:true の場合 dataはnull、countはレスポンスに含まれる
@@ -93,8 +93,14 @@ export default function AddHabitForm() {
 
       router.replace("/"); // ダッシュボードへ
       router.refresh();
-    } catch (err: any) {
-      setError(err?.message ?? "作成に失敗しました");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === "string"
+          ? err
+          : "作成に失敗しました";
+      setError(message);
     } finally {
       setSubmitting(false);
     }
