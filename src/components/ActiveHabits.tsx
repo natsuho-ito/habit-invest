@@ -117,6 +117,7 @@ export default function ActiveHabits() {
     try {
       const { error } = await supabase.rpc("log_done_and_update", {
         p_habit_id: habitId,
+        p_on: today
       });
       if (error) throw error;
 

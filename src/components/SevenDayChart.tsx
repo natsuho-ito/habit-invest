@@ -138,7 +138,16 @@ export default function SevenDayChart() {
 
   return (
     <div className="space-y-2">
-      {/* ...（UIはそのまま） */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded border p-3">
+          <div className="text-xs text-gray-500">総資産</div>
+          <div className="text-2xl font-mono font-semibold">{total} コイン</div>
+        </div>
+        <div className="rounded border p-3">
+          <div className="text-xs text-gray-500">今日の投資</div>
+          <div className="text-2xl font-mono font-semibold">+{today} コイン</div>
+        </div>
+      </div>
       <Bar data={{ labels, datasets }} options={{ /* ... */ }} />
     </div>
   );
