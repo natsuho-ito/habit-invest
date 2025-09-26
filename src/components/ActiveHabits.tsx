@@ -337,7 +337,7 @@ export default function ActiveHabits() {
             key={h.id}
             className="flex items-center justify-between rounded border p-3"
           >
-            <div>
+            {/* <div>
               <div className="flex items-center gap-2">
                 <span className="font-medium">{h.title}</span>
                 {h.goal && (
@@ -349,6 +349,22 @@ export default function ActiveHabits() {
               <div className="text-sm text-gray-500">
                 累計 {h.total_investment} / 目標 {h.target_days}日（達成{" "}
                 {h.total_days}日）
+              </div>
+            </div> */}
+            <div>
+              {/* タイトル */}
+              <div className="font-medium break-words">{h.title}</div>
+
+              {/* ゴールタグ（存在する場合） */}
+              {h.goal && (
+                <div className="mt-1 inline-block px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-700 break-words">
+                  {h.goal.title}
+                </div>
+              )}
+
+              {/* 累計情報 */}
+              <div className="text-sm text-gray-500 mt-1">
+                累計 {h.total_investment} / 目標 {h.target_days}日（達成 {h.total_days}日）
               </div>
             </div>
             <button
