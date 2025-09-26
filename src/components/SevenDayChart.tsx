@@ -145,7 +145,7 @@ export default function SevenDayChart() {
         </div>
         <div className="rounded border p-3">
           <div className="text-xs text-gray-500">今日の投資</div>
-          <div className="text-2xl font-mono font-semibold"><span style={{ color: "green" }}>+{today} HBT</span> </div>
+          <div className="text-2xl font-mono font-semibold text-green-600">+{today} HBT </div>
         </div>
       </div>
       
