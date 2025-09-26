@@ -16,10 +16,10 @@ export default function Nav() {
   return (
       <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="mx-auto max-w-2xl h-12 px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">    
-          <Link href="/" className="pr-4 flex items-center gap-1">
-              <LeafIcon className="h-6 w-6" />
-              <span className="font-bold">ミエル</span>
+          <div className="flex items-center gap-2 text-md text-green-800 font-bold">    
+          <Link href="/" className="pr-3 flex items-center gap-1">
+              <CheckCircleIcon className="h-6 w-6" />
+              InvestSelf
           </Link>
           </div>
           <div className="flex items-center gap-2 text-sm">
@@ -52,6 +52,16 @@ export default function Nav() {
       <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
         <path d="M21 3c-7 1-13.5 4.5-16 11 3 3 8 3.5 11 1.5 2.5-2 3.5-5.5 3-9.5 1-.5 1-2-.5-3z" />
         <path d="M4 20c3-3 6-5 9-6" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      </svg>
+    );
+  }
+  function CheckCircleIcon({ className = "" }: { className?: string }) {
+    return (
+      <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+        {/* 丸 */}
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
+        {/* チェックマーク */}
+        <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     );
   }
