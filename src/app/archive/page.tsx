@@ -27,7 +27,7 @@ export default async function ArchivePage() {
             <div key={h.id} className="rounded border p-3">
               <div className="font-medium">{h.title}</div>
               <div className="text-sm text-gray-600">
-                達成：{h.total_days}/{h.target_days}日 ・ 累計投資：{h.total_investment} コイン
+                達成：{h.total_days}/{h.target_days}日 ・ 累計投資：{h.total_investment} HBT
               </div>
               <div className="text-xs text-gray-500">
                 追加: {new Date(h.created_at!).toLocaleDateString()} ／ 卒業: {h.archived_at ? new Date(h.archived_at).toLocaleDateString() : "-"}

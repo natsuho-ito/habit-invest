@@ -103,7 +103,7 @@ export default function SevenDayChart() {
   // ---- 以下はそのまま（集計・描画） ----
   const { labels, datasets, total, today } = useMemo(() => {
     const labels = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(); d.setDate(d.getDate() - (6 - i));
+      const d = new Date(); d.setDate(d.getDate() - (4 - i));
       return toYmdJST(d);
     });
 
@@ -141,16 +141,46 @@ export default function SevenDayChart() {
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded border p-3">
           <div className="text-xs text-gray-500">総資産</div>
-          <div className="text-2xl font-mono font-semibold">{total} USD</div>
+          <div className="text-2xl font-mono font-semibold">{total} HBT</div>
         </div>
         <div className="rounded border p-3">
           <div className="text-xs text-gray-500">今日の投資</div>
-          <div className="text-2xl font-mono font-semibold"><span style={{ color: "green" }}>+{today} USD</span> </div>
+          <div className="text-2xl font-mono font-semibold"><span style={{ color: "green" }}>+{today} HBT</span> </div>
         </div>
       </div>
       
 
-      <Bar data={{ labels, datasets }} options={{ /* ... */ }} />
+      {/* <Bar data={{ labels, datasets }} options={{ }} /> */}
+      <Bar
+  data={{ labels, datasets }}
+  options={{
+    responsive: true,
+    animation: { duration: 500, easing: "easeOutQuart" },
+    plugins: {
+      // ← ここで凡例を非表示にする
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: +${ctx.formattedValue} HBT`,
+        },
+      },
+    },
+    scales: {
+      x: { stacked: true },
+      y: {
+        stacked: true,
+        title: {
+          display: true,
+          text: "投資額（HBT）",
+          font: { weight: "bold" },
+        },
+      },
+    },
+  }}
+/>
+
     </div>
   );
 }
