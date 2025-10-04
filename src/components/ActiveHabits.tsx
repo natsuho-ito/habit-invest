@@ -33,6 +33,36 @@ export default function ActiveHabits() {
   const [doneTodayIds, setDoneTodayIds] = useState<Set<string>>(new Set());
   const [today, setToday] = useState<string>(() => toYmdJST(new Date())); // JSTの今日
 
+  const availableColors = [
+    "bg-orange-200",
+    "bg-purple-200",
+    "bg-blue-200",
+    "bg-lime-200",
+    "bg-cyan-200",
+    "bg-green-200",
+    "bg-sky-200",
+    "bg-pink-200",
+    "bg-yellow-200",
+    "bg-teal-200",
+  ];
+
+  const goalColorMap: Record<string, string> = {};
+
+// 配列から順番に色を割り当てる関数
+function assignGoalColor(goalTitle: string) {
+  if (!goalColorMap[goalTitle]) {
+    // すでに割り当てられている色を除外
+    const usedColors = Object.values(goalColorMap);
+    const available = availableColors.filter((c) => !usedColors.includes(c));
+
+    // 使える色がなければ最後の色（gray）を使う
+    const color = available.length > 0 ? available[0] : "bg-gray-200";
+
+    goalColorMap[goalTitle] = color;
+  }
+  return goalColorMap[goalTitle];
+}
+
   // ---- Data fetchers -------------------------------------------
 
   const fetchHabits = async () => {
@@ -148,57 +178,59 @@ export default function ActiveHabits() {
 
   // ---- Render --------------------------------------------------
 
+  // ゴールごとにhabitsをグルーピング
+  const habitsByGoal = habits.reduce<Record<string, Habit[]>>((acc, habit) => {
+    const goalTitle = habit.goal?.title ?? "ゴールなし";
+    if (!acc[goalTitle]) acc[goalTitle] = [];
+    acc[goalTitle].push(habit);
+    return acc;
+  }, {});
+
   return (
-    <div className="space-y-3">
-      {habits.map((h) => {
-        const disabled = loadingIds.includes(h.id) || doneTodayIds.has(h.id);
-        return (
-          <div
-            key={h.id}
-            className="flex items-center justify-between rounded border p-3"
-          >
-            {/* <div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{h.title}</span>
-                {h.goal && (
-                  <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">
-                    {h.goal.title}
-                  </span>
-                )}
-              </div>
-              <div className="text-sm text-gray-500">
-                累計 {h.total_investment} / 目標 {h.target_days}日（達成{" "}
-                {h.total_days}日）
-              </div>
-            </div> */}
-            <div>
-              {/* タイトル */}
-              <div className="font-medium break-words">{h.title}</div>
+    <div className="space-y-6">
+     {Object.entries(habitsByGoal).map(([goalTitle, goalHabits]) => {
+  const bgColor = assignGoalColor(goalTitle);
 
-              {/* ゴールタグ（存在する場合） */}
-              {h.goal && (
-                <div className="mt-1 inline-block px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-700 break-words">
-                  {h.goal.title}
-                </div>
-              )}
+  return (
+    <div key={goalTitle} className="space-y-1">
+      {/* ゴールタイトル */}
+      <div className={`${bgColor} inline-block px-4 py-2 rounded-lg font-medium text-gray-900`}>
+        {goalTitle}
+      </div>
 
-              {/* 累計情報 */}
-              <div className="text-sm text-gray-500 mt-1">
-                累計 {h.total_investment} / 目標 {h.target_days}日（達成 {h.total_days}日）
-              </div>
-            </div>
-            <button
-              className="px-3 py-2 rounded bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={disabled}
-              onClick={() => onCheck(h.id)}
-              aria-label={`${h.title} を +${h.unit_amount} 記録`}
-              title={disabled ? "今日は記録済み" : `+${h.unit_amount} 記録`}
+      {/* ゴールに紐づく習慣リスト */}
+      <div className="space-y-3 mt-2">
+        {goalHabits.map((h) => {
+          const disabled = loadingIds.includes(h.id) || doneTodayIds.has(h.id);
+          return (
+            <div
+              key={h.id}
+              className="flex items-center justify-between rounded-lg border p-3 hover:shadow-sm transition-shadow"
             >
-              +{h.unit_amount}
-            </button>
-          </div>
-        );
-      })}
+              <div>
+                <div className="font-medium break-words">{h.title}</div>
+                <div className="text-sm text-gray-500 mt-1">
+                  累計 {h.total_investment} / 目標 {h.target_days}日（達成 {h.total_days}日）
+                </div>
+              </div>
+              <button
+                className="px-3 py-2 rounded bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={disabled}
+                onClick={() => onCheck(h.id)}
+                aria-label={`${h.title} を +${h.unit_amount} 記録`}
+                title={disabled ? "今日は記録済み" : `+${h.unit_amount} 記録`}
+              >
+                +{h.unit_amount}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+})}
+
+
       {habits.length === 0 && (
         <p className="text-sm text-gray-500">
           アクティブな習慣がありません。まずは追加してください。
