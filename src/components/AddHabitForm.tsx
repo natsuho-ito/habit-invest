@@ -7,7 +7,8 @@ import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 const schema = z.object({
   title: z.string().min(1, "タイトルは必須です").max(50),
-  trigger: z.string().max(50).optional(),
+  trigger: z.string().max(100).optional(),
+  steps: z.string().max(200).optional(),
   target_days: z.coerce.number().int().min(1).max(365).default(30),
   unit_amount: z.coerce.number().int().min(1).max(999).default(1),
   goal_id: z.string().nonempty("ゴールを選択してください"),
@@ -22,6 +23,7 @@ export default function AddHabitForm() {
   const [form, setForm] = useState({
     title: "",
     trigger: "",
+    steps: "",
     target_days: 30,
     unit_amount: 1,
     goal_id: "",
@@ -95,6 +97,7 @@ export default function AddHabitForm() {
         user_id: uid,
         title: parsed.data.title,
         trigger: parsed.data.trigger || null,
+        steps: parsed.data.steps || null,
         target_days: parsed.data.target_days,
         unit_amount: parsed.data.unit_amount,
         goal_id: parsed.data.goal_id,
@@ -154,6 +157,17 @@ export default function AddHabitForm() {
           type="text"
           name="trigger"
           value={form.trigger}
+          onChange={onChange}
+          className="w-full border rounded p-2"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">ステップ（任意）</label>
+        <input
+          type="text"
+          name="steps"
+          value={form.steps}
           onChange={onChange}
           className="w-full border rounded p-2"
         />
