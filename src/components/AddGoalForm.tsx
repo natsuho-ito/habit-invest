@@ -5,30 +5,49 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
+// --- スキーマ定義 ----------------------------------------------------
 const schema = z.object({
   title: z.string().min(1, "タイトルは必須です").max(50),
   description: z.string().max(50).optional(),
+  category_id: z.string().min(1, "カテゴリを選択してください"),
 });
 
-type Goal = { id: string; title: string };
+// --- 型定義 ----------------------------------------------------------
+type Category = { id: string; name: string };
 
 export default function AddGoalForm() {
   const supabase = supabaseBrowser();
   const router = useRouter();
 
+  const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({
     title: "",
-    description: ""
+    description: "",
+    category_id: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // onChange: number フィールドは数値へ変換
+  // --- カテゴリ一覧の取得 -------------------------------------------
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase.from("categories").select("id, name").order("name");
+      if (error) {
+        console.error(error);
+      } else {
+        setCategories(data || []);
+      }
+    };
+    fetchCategories();
+  }, [supabase]);
+
+  // --- フォーム変更 --------------------------------------------------
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   };
 
+  // --- 送信処理 ------------------------------------------------------
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -41,20 +60,18 @@ export default function AddGoalForm() {
 
     setSubmitting(true);
     try {
-      // セッションとユーザーID
       const { data: sessionData } = await supabase.auth.getSession();
       const uid = sessionData?.session?.user?.id;
       if (!uid) throw new Error("ログインが必要です");
 
-      // insert に user_id と goal_id を含める
       const insertPayload = {
         user_id: uid,
         title: parsed.data.title,
-        description: parsed.data.description || null
+        description: parsed.data.description || null,
+        category_id: parsed.data.category_id,
       };
 
       const { error: insErr } = await supabase.from("goals").insert(insertPayload);
-
       if (insErr) throw insErr;
 
       router.push("/");
@@ -68,6 +85,7 @@ export default function AddGoalForm() {
     }
   };
 
+  // --- JSX -----------------------------------------------------------
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -92,6 +110,23 @@ export default function AddGoalForm() {
           onChange={onChange}
           className="w-full border rounded p-2"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">カテゴリ</label>
+        <select
+          name="category_id"
+          value={form.category_id}
+          onChange={onChange}
+          className="w-full border rounded p-2"
+        >
+          <option value="">-- カテゴリー (投資銘柄) を選択してください --</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <button

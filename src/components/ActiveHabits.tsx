@@ -228,7 +228,7 @@ export default function ActiveHabits() {
                       <div className="flex items-center gap-2">
                         {/* ✅ 今日記録済みならコイン表示 */}
                         {doneTodayIds.has(h.id) && (
-                          <span className="text-green-600 text-sm font-medium">
+                          <span className="text-green-600 text-sm font-bold">
                             +{h.unit_amount} HBT
                           </span>
                         )}

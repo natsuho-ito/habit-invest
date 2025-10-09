@@ -7,10 +7,10 @@ import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 const schema = z.object({
   title: z.string().min(1, "タイトルは必須です").max(50),
-  trigger: z.string().max(100).optional(),
+  trigger: z.string().max(200).optional(),
   steps: z.string().max(200).optional(),
   target_days: z.coerce.number().int().min(1).max(365).default(30),
-  unit_amount: z.coerce.number().int().min(1).max(999).default(1),
+  unit_amount: z.coerce.number().int().min(1).max(3).default(1),
   goal_id: z.string().nonempty("ゴールを選択してください"),
 });
 
@@ -194,7 +194,7 @@ export default function AddHabitForm() {
             value={form.unit_amount}
             onChange={onChange}
             min={1}
-            max={999}
+            max={3}
             className="w-full rounded border px-3 py-2"
           />
         </div>
