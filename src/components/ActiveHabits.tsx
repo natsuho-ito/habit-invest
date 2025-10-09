@@ -11,6 +11,10 @@ import { sendHabitLogBroadcast, getHabitLogsChannel } from "@/lib/realtime";
 type Goal = {
   id: string;
   title: string;
+  category: {
+    id: string;
+    name: string;
+  } | null;
 };
 
 type Habit = {
@@ -68,12 +72,34 @@ export default function ActiveHabits() {
   const fetchHabits = async () => {
     const { data, error } = await supabase
       .from("habits")
-      .select(
-        "id,title,unit_amount,total_investment,target_days,total_days,trigger,steps,goal:goals(id,title)"
-      )
+      // .select(
+      //   "id,title,unit_amount,total_investment,target_days,total_days,trigger,steps,goal:goals(id,title)"
+      // )
+      .select(`
+        id,
+        title,
+        status,
+        unit_amount,
+        total_investment,
+        target_days,
+        total_days,
+        trigger,
+        steps,
+        goal:goals (
+          id,
+          title,
+          description,
+          due_date,
+          category_id,
+          category:categories!goals_category_id_fkey (
+            id,
+            name
+          )
+        )
+      `)
       .eq("status", "active")
       .order("created_at", { ascending: true })
-      .limit(6)
+      // .limit(6)
       .returns<Habit[]>(); // ← 型を明示
 
     if (!error && data) {
@@ -192,11 +218,16 @@ export default function ActiveHabits() {
 
         return (
           <div key={goalTitle} className="space-y-1">
-            {/* ゴールタイトル */}
-            <div
-              className={`${bgColor} inline-block px-4 py-2 rounded-lg font-medium text-gray-900`}
-            >
+
+            <div className={`${bgColor} inline-block px-4 py-2 rounded-lg font-medium text-gray-900`}>
               {goalTitle}
+
+              {/* カテゴリ名をタグ風に表示 */}
+              {goalHabits[0]?.goal?.category && (
+                <span className="ml-2 px-2 py-0.5 rounded-full text-xs bg-white/60 text-gray-700">
+                  {goalHabits[0].goal.category.name}
+                </span>
+              )}
             </div>
 
             {/* ゴールに紐づく習慣リスト */}
@@ -209,20 +240,6 @@ export default function ActiveHabits() {
                     key={h.id}
                     className="flex flex-col rounded-lg border p-3 hover:shadow-sm transition-shadow"
                   >
-                    {/* <div className="flex items-center justify-between">
-                      <div className="font-medium break-words">{h.title}</div>
-                      <button
-                        className="px-3 py-2 rounded bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={disabled}
-                        onClick={() => onCheck(h.id)}
-                        aria-label={`${h.title} を +${h.unit_amount} 記録`}
-                        title={
-                          disabled ? "今日は記録済み" : `+${h.unit_amount} 記録`
-                        }
-                      >
-                        +{h.unit_amount}
-                      </button>
-                    </div> */}
                     <div className="flex items-center justify-between">
                       <div className="font-medium break-words">{h.title}</div>
                       <div className="flex items-center gap-2">
