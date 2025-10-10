@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { redirect } from "next/navigation";
 import SevenDayChart from "@/components/SevenDayChart";
+import PortfolioChart from "@/components/PortfolioChart";
 import ActiveHabits from "@/components/ActiveHabits";
 // import Link from "next/link";
 import Nav from "@/components/Nav";
@@ -17,6 +18,7 @@ export default async function Home() {
       </header>
 
       <SevenDayChart />
+      <PortfolioChart />
       <section>
         <h2 className="font-medium mb-2">アクティブ習慣（最大5件）</h2>
         <ActiveHabits />
