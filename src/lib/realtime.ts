@@ -2,12 +2,20 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 /** Broadcast で流すイベント（habitId を含める） */
+// export type HabitLogEvent = {
+//   kind: "insert";
+//   date: string;
+//   amount: number;
+//   habitId: string;
+//   habitTitle: string | null;
+// };
+
 export type HabitLogEvent = {
-  kind: "insert";
+  kind: "insert" | "update" | "delete";
   date: string;
   amount: number;
   habitId: string;
-  habitTitle: string | null;
+  habitTitle?: string;
 };
 
 let channel: RealtimeChannel | null = null;
