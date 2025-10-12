@@ -9,7 +9,7 @@ const schema = z.object({
   title: z.string().min(1, "タイトルは必須です").max(50),
   trigger: z.string().max(200).optional(),
   steps: z.string().max(200).optional(),
-  target_days: z.coerce.number().int().min(1).max(365).default(30),
+  target_days: z.coerce.number().int().min(1).max(365).default(7),
   unit_amount: z.coerce.number().int().min(1).max(3).default(1),
   goal_id: z.string().nonempty("ゴールを選択してください"),
 });
@@ -24,7 +24,7 @@ export default function AddHabitForm() {
     title: "",
     trigger: "",
     steps: "",
-    target_days: 30,
+    target_days: 7,
     unit_amount: 1,
     goal_id: "",
   });
@@ -182,7 +182,7 @@ export default function AddHabitForm() {
             value={form.target_days}
             onChange={onChange}
             min={1}
-            max={365}
+            max={60}
             className="w-full rounded border px-3 py-2"
           />
         </div>

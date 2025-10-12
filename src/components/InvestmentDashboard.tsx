@@ -11,11 +11,25 @@ type Row = { date: string; amount: number; habits: { title: string } | null };
 type RowRaw = { date: string; amount: number; habits: { title: string }[] | { title: string } | null };
 
 type RowPortfolioRaw = {
-  date: string;
-  amount: number;
-  habits: { goals: { categories: { name: string } | null } | null } | null;
-};
-type RowPortfolio = { date: string; amount: number; category: string };
+    date: string;
+    amount: number;
+    habits: {
+      goals: {
+        categories: {
+          name: string;
+          color: string | null; // ← 追加！
+        } | null;
+      } | null;
+    } | null;
+  };
+  
+  type RowPortfolio = {
+    date: string;
+    amount: number;
+    category: string;
+    color: string; // ← 追加！
+  };
+  
 
 export default function InvestmentDashboard() {
   const supabase = supabaseBrowser();
@@ -138,7 +152,7 @@ export default function InvestmentDashboard() {
   const refreshPortfolio = async () => {
     const monday = getMonday();
     const ymd = toYmdJST(monday);
-
+  
     const { data, error } = await supabase
       .from("habit_logs")
       .select(`
@@ -147,24 +161,26 @@ export default function InvestmentDashboard() {
         habits (
           goals (
             categories (
-              name
+              name,
+              color
             )
           )
         )
-      `)
+      `) // ← colorを取得
       .gte("date", ymd)
       .order("date", { ascending: true })
       .returns<RowPortfolioRaw[]>();
-
+  
     if (error) return console.error(error);
-
+  
     const normalized: RowPortfolio[] =
       (data ?? []).map((r) => ({
         date: r.date,
         amount: r.amount,
         category: r.habits?.goals?.categories?.name ?? "未分類",
+        color: r.habits?.goals?.categories?.color ?? "#ccc", // ← fallbackも設定
       })) ?? [];
-
+  
     setPortfolioRows(normalized);
   };
 
@@ -172,16 +188,23 @@ export default function InvestmentDashboard() {
     void refreshPortfolio();
   }, []);
 
-  const { labels: pieLabels, data: pieData, total: weekTotal } = useMemo(() => {
-    const byCategory: Record<string, number> = {};
+  const { labels: pieLabels, data: pieData, colors: pieColors, total: weekTotal } = useMemo(() => {
+    const byCategory: Record<string, { amount: number; color: string }> = {};
     portfolioRows.forEach((r) => {
-      byCategory[r.category] = (byCategory[r.category] || 0) + r.amount;
+      if (!byCategory[r.category]) {
+        byCategory[r.category] = { amount: 0, color: r.color };
+      }
+      byCategory[r.category].amount += r.amount;
     });
+  
     const labels = Object.keys(byCategory);
-    const data = Object.values(byCategory);
+    const data = labels.map((l) => byCategory[l].amount);
+    const colors = labels.map((l) => byCategory[l].color);
     const total = data.reduce((a, b) => a + b, 0);
-    return { labels, data, total };
+  
+    return { labels, data, colors, total };
   }, [portfolioRows]);
+  
 
   const palettePie = [
     "rgba(251,146,60,0.8)",  // オレンジ
@@ -251,27 +274,27 @@ export default function InvestmentDashboard() {
         <div>
           <div className="text-xs text-gray-500 mb-1">今週の投資割合</div>
           <div className="w-3/5 mx-auto">
-            <Pie
-              data={{
+          <Pie
+            data={{
                 labels: pieLabels,
                 datasets: [
-                  {
+                {
                     data: pieData,
-                    backgroundColor: pieLabels.map((_, i) => palettePie[i % palettePie.length]),
-                  },
+                    backgroundColor: pieColors, // ← DBの色を使用！
+                },
                 ],
-              }}
-              options={{
+            }}
+            options={{
                 responsive: true,
                 plugins: {
-                  legend: { position: "bottom" },
-                  tooltip: {
+                legend: { position: "bottom" },
+                tooltip: {
                     callbacks: {
-                      label: (ctx) => `${ctx.label}: +${ctx.formattedValue} HBT`,
+                    label: (ctx) => `${ctx.label}: +${ctx.formattedValue} HBT`,
                     },
-                  },
                 },
-              }}
+                },
+            }}
             />
           </div>
         </div>
