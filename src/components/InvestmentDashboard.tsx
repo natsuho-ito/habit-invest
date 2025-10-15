@@ -99,13 +99,53 @@ export default function InvestmentDashboard() {
     };
   }, [supabase]);
 
+  // 既存の棒グラフ用 useEffect のすぐ下に追加
+useEffect(() => {
+    const channel = getHabitLogsChannel().on("broadcast", { event: "habit_log" }, (payload) => {
+      const p = payload.payload as HabitLogEvent & {
+        kind: "insert" | "update" | "delete";
+      };
+  
+      const since = new Date();
+      since.setDate(since.getDate() - 6);
+      const minYmd = toYmdJST(since);
+  
+      // 円グラフも対象にしたいので、「今週内のデータ」であれば更新
+      if (p.kind === "insert" && p.date >= minYmd) {
+        void refreshPortfolio(); // ← ✅ 円グラフデータを再取得
+      } else if (p.kind === "update" || p.kind === "delete") {
+        void refreshPortfolio(); // ← ✅ 更新・削除も再取得
+      }
+    });
+  
+    // 定期リフレッシュもオプションで残してOK
+    const interval = window.setInterval(() => void refreshPortfolio(), 15000);
+  
+    return () => {
+      window.clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [supabase]);
+  
+
+  const getMonday = (date = new Date()) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 月曜を週の始まりに
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
   const { labels, datasets, total, today } = useMemo(() => {
+    // 月曜日を基準に7日間分のラベルを作成
+    const monday = getMonday();
     const labels = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (6 - i));
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
       return toYmdJST(d);
     });
-
+  
     const byDateHabit: Record<string, Record<string, number>> = {};
     const habitNames = new Set<string>();
     rows.forEach((r) => {
@@ -114,7 +154,7 @@ export default function InvestmentDashboard() {
       byDateHabit[r.date] ??= {};
       byDateHabit[r.date][name] = (byDateHabit[r.date][name] || 0) + r.amount;
     });
-
+  
     const palette = [
       "rgba(34,197,94,0.8)",
       "rgba(59,130,246,0.8)",
@@ -124,30 +164,20 @@ export default function InvestmentDashboard() {
       "rgba(99,102,241,0.8)",
       "rgba(244,63,94,0.8)",
     ];
-    
-
+  
     const datasets = Array.from(habitNames).map((name, i) => ({
       label: name,
       data: labels.map((d) => byDateHabit[d]?.[name] || 0),
       backgroundColor: palette[i % palette.length],
       stack: "s1",
     }));
-
+  
     const totals = rows.reduce((s, r) => s + r.amount, 0);
     const todayYmd = toYmdJST(new Date());
     const todayTotal = rows.filter((r) => r.date === todayYmd).reduce((s, r) => s + r.amount, 0);
-
+  
     return { labels, datasets, total: totals, today: todayTotal };
   }, [rows]);
-
-  const getMonday = () => {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(d.setDate(diff));
-    monday.setHours(0, 0, 0, 0);
-    return monday;
-  };
 
   const refreshPortfolio = async () => {
     const monday = getMonday();
