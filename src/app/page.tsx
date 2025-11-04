@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { redirect } from "next/navigation";
 import InvestmentDashboard from "@/components/InvestmentDashboard";
+import WeeklyReminder from "@/components/WeeklyReminder";
 import SevenDayChart from "@/components/SevenDayChart";
 import PortfolioChart from "@/components/PortfolioChart";
 import ActiveHabits from "@/components/ActiveHabits";
@@ -17,6 +18,8 @@ export default async function Home() {
       <header className="flex items-center justify-between">
         <Nav />
       </header>
+      {/* 💡 毎週日曜にポップアップを出す */}
+      <WeeklyReminder />
       <InvestmentDashboard />
       {/* <SevenDayChart />
       <PortfolioChart /> */}
