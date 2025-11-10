@@ -38,6 +38,8 @@ export default function ActiveHabits() {
   const [doneTodayIds, setDoneTodayIds] = useState<Set<string>>(new Set());
   const [today, setToday] = useState<string>(() => toYmdJST(new Date())); // JSTの今日
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set()); // 折りたたみ状態
+  const [popupHabit, setPopupHabit] = useState<Habit | null>(null);　// ポップアップ表示用
+
 
   // ---- カラー設定 ------------------------------------------------
 
@@ -150,6 +152,23 @@ export default function ActiveHabits() {
 
     const snapshot = habits.map((h) => ({ ...h }));
 
+    // setHabits((prev) =>
+    //   prev.map((h) =>
+    //     h.id === habitId
+    //       ? {
+    //           ...h,
+    //           total_investment: h.total_investment + h.unit_amount,
+    //           total_days: h.total_days + 1,
+    //         }
+    //       : h
+    //   )
+    // );
+    // setDoneTodayIds((prev) => {
+    //   const next = new Set(prev);
+    //   next.add(habitId);
+    //   return next;
+    // });
+
     setHabits((prev) =>
       prev.map((h) =>
         h.id === habitId
@@ -161,11 +180,23 @@ export default function ActiveHabits() {
           : h
       )
     );
+    
+    // 今日の達成状況に追加
     setDoneTodayIds((prev) => {
       const next = new Set(prev);
       next.add(habitId);
       return next;
     });
+    
+    // 目標達成した場合はポップアップを表示
+    // total_days 更新後
+    if (target.total_days + 1 >= target.target_days) {
+      setPopupHabit({
+        ...target,
+        total_days: target.total_days + 1, // 即時反映
+      });
+    }
+
 
     sendHabitLogBroadcast({
       kind: "insert",
@@ -174,7 +205,7 @@ export default function ActiveHabits() {
       habitId,
       habitTitle: target.title ?? null,
     });
-
+    
     try {
       const { error } = await supabase.rpc("log_done_and_update", {
         p_habit_id: habitId,
@@ -312,6 +343,27 @@ export default function ActiveHabits() {
           アクティブな習慣がありません。まずは追加してください。
         </p>
       )}
+{/* ポップアップUI（背景は透過なし） */}
+{popupHabit && (
+  <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+    <div className="bg-white p-6 rounded-2xl shadow-lg text-center space-y-4 pointer-events-auto">
+      <h2 className="text-lg font-semibold">目標日数を達成しました 🎉</h2>
+      <p className="text-lg font-medium text-center">
+        「{popupHabit.title}」<br />
+        累計 {popupHabit.total_days} 日
+      </p>
+      <button
+        onClick={() => {
+          setPopupHabit(null);
+        }}
+        className="px-4 py-2 bg-black text-white rounded-lg"
+      >
+        閉じる
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
